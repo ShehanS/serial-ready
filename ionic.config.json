@@ -1,0 +1,7 @@
+{
+  "name": "serial-ready",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
