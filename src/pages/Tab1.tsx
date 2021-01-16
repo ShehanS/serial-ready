@@ -1,16 +1,24 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCard, IonCardSubtitle, IonCardTitle, IonToast, IonItem, IonInput, IonRow, IonCardHeader, IonCardContent } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonCard, IonCardSubtitle, IonCardTitle, IonToast, IonItem, IonInput, IonRow, IonCardHeader, IonCardContent, IonIcon } from '@ionic/react';
 import './Tab1.css';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import React from 'react';
 import { Observable, Subscription, from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { useForm } from "react-hook-form";
+import { bluetooth, flash, flashOff, reload, search, send, star } from 'ionicons/icons';
 let connection: Subscription;
 let connectionCommunication: Subscription;
 let reader: Observable<any>;
 
-
-
+/*
+App Name : Ionic React Serial Port
+Date : 2021-01-13
+Author : Shehan Shalinda
+Email : shehan.salinda92@gmail.com
+Plugins and libs : 
+https://ionicframework.com/docs/native/bluetooth-serial
+https://www.npmjs.com/package/cordova-plugin-bluetooth-serial
+*/
 
 //bluetooth service
 function turnOnBluetooth() {
@@ -49,7 +57,6 @@ function searchBluetooth(): Promise<Object> {
 }
 
 
-
 //currect connection disconnect
 function disconnect(): Promise<boolean> {
   return new Promise((result) => {
@@ -82,8 +89,6 @@ function dataInOut(message: string): Observable<any> {
     });
   });
 }
-
-
 
 interface IDevice {
   name: string;
@@ -118,25 +123,25 @@ const Tab1: React.FC = () => {
         dataInOut(`initilize\n`).subscribe(data => {
           if (data !== 'BLUETOOTH.NOT_CONNECTED') {
             try {
-              if (data) {           
+              if (data) {
                 setRXMessage(data);
               }
             } catch (error) {
               console.log("[bluetooth-168]:" + JSON.stringify(error));
             }
-  
+
           } else {
-            console.log("[couldn't connect with bluetooth]:" );
+            console.log("[couldn't connect with bluetooth]:");
           }
         });
-       
+
         resolve('BLUETOOTH.CONNECTED');
       }, fail => {
         console.log("[bluetooth.service-88] Error context: " + JSON.stringify(fail));
         reject('BLUETOOTH.CANNOT_CONNECT');
       });
     });
-  
+
   }
 
   //send enter commands
@@ -155,7 +160,7 @@ const Tab1: React.FC = () => {
           }
 
         } else {
-          console.log("[couldn't connect with bluetooth]:" );
+          console.log("[couldn't connect with bluetooth]:");
         }
       });
     }).catch(error => console.log(error));
@@ -166,7 +171,7 @@ const Tab1: React.FC = () => {
 
 
 
-//bluetooth service unsubscribe
+  //bluetooth service unsubscribe
   function disconnectDevice() {
     disconnect().then(status => {
       if (status == true) {
@@ -190,34 +195,38 @@ const Tab1: React.FC = () => {
   }
 
   //Light on/Light off
-  function toggleLightButton(){
-      if(toggleButtonState == false){
-        console.log("Light ON")
-        setToggleButton(true);
-        sendDataCustomMessage("ON");
-      }else{
-        console.log("Light OFF")
-        setToggleButton(false);
-        sendDataCustomMessage("OFF");
-      }
+  function toggleLightButton() {
+    if (toggleButtonState == false) {
+      console.log("Light ON")
+      setToggleButton(true);
+      sendDataCustomMessage("ON");
+    } else {
+      console.log("Light OFF")
+      setToggleButton(false);
+      sendDataCustomMessage("OFF");
+    }
 
   }
 
+  function gotoBluetoothSetting() {
+    BluetoothSerial.showBluetoothSettings();
+  }
 
-//getting currect paired list via blutooth service 
+  function getPairedList() {
+    let devices: [];
+    searchBluetooth().then((device) => {
+      var jsonObject = JSON.stringify(device);
+      devices = JSON.parse(jsonObject);
+      setDeviceList(devices);
+      console.log(devicesList);
+    });
+  }
+
+  //getting currect paired list via blutooth service 
   function DeviceList() {
-    const addDevice = () => {
-      let devices: [];
-      searchBluetooth().then((device) => {
-        var jsonObject = JSON.stringify(device);
-        devices = JSON.parse(jsonObject);
-        setDeviceList(devices);
-        console.log(devicesList);
-      });
-    }
+
     return (
       <div>
-        <IonButton color="warning" disabled={!buttonState} onClick={addDevice}>Add Device</IonButton>
         {devicesList.map((device) => (
           <IonCard key={device.id} style={{ padding: 10 }}>
             <IonCardTitle>{device.name}</IonCardTitle>
@@ -232,7 +241,7 @@ const Tab1: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Tab 1</IonTitle>
+          <IonTitle>Bluetooth Serial Demo App</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
@@ -243,13 +252,25 @@ const Tab1: React.FC = () => {
         </IonHeader>
 
         <IonRow>
+          <IonButton onClick={gotoBluetoothSetting}>
+            <IonIcon slot="icon-only" icon={bluetooth} />
+          </IonButton>
+          <IonButton
+            color="warning" disabled={!buttonState} onClick={getPairedList}>
+            <IonIcon slot="icon-only" icon={reload}></IonIcon>
+          </IonButton>
           <form onSubmit={handleSubmit(onSubmit)}>
             <IonRow>
-              <IonInput disabled={buttonState} style={{ width: '250px' }} value={customMessage} placeholder="Enter Commands" onIonChange={e => setDataCustomMessage(e.detail.value!)}></IonInput>
-              <IonButton onClick={() => sendDataCustomMessage(customMessage)} color="success" disabled={buttonState}>SEND DATA</IonButton>
+
+              <IonInput required disabled={buttonState} style={{ width: '250px' }} value={customMessage} placeholder="Enter Commands" onIonChange={e => setDataCustomMessage(e.detail.value!)}></IonInput>
+              <IonButton onClick={() => sendDataCustomMessage(customMessage)} color="success" disabled={buttonState}>
+                <IonIcon slot="icon-only" icon={send}></IonIcon>
+              </IonButton>
             </IonRow>
           </form>
-          <IonButton disabled={buttonState} onClick={toggleLightButton} color="danger">{toggleButtonState?'Light ON' : 'Light OFF'}</IonButton>
+          <IonButton disabled={buttonState} onClick={toggleLightButton} color="danger">
+            <IonIcon slot="icon-only" icon={toggleButtonState ? flash : flashOff}></IonIcon>
+          </IonButton>
           <IonButton disabled={buttonState} onClick={disconnectDevice}>Disconnect</IonButton>
         </IonRow>
         <DeviceList></DeviceList>

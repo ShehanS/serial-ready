@@ -43,7 +43,7 @@ const App: React.FC = () => (
         <IonTabBar slot="bottom">
           <IonTabButton tab="tab1" href="/tab1">
             <IonIcon icon={bluetooth} />
-            <IonLabel>Sample Bluetooth Serialport</IonLabel>
+           
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
