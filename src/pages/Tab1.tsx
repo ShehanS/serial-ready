@@ -20,19 +20,6 @@ https://ionicframework.com/docs/native/bluetooth-serial
 https://www.npmjs.com/package/cordova-plugin-bluetooth-serial
 */
 
-//bluetooth service
-function turnOnBluetooth() {
-  BluetoothSerial.isEnabled().then(() => {
-    console.log("[bluetooth.service-enable ok]");
-  }, () => {
-    console.log("[bluetooth.service-try to enable bluetooth]");
-    BluetoothSerial.enable().then(() => {
-      console.log("[bluetooth.service-bluetooth got enable]");
-    }, () => {
-      console.log("[bluetooth.service-isn't enable]");
-    });
-  });
-}
 
 //getting paired devices 
 function searchBluetooth(): Promise<Object> {
